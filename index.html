@@ -3,64 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Cat and Mouse Animation</title>
+    <title>Cat and Mouse Animation</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #e0f7fa;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            position: relative;
+            height: 100vh;
+        }
+        #mouse {
+            position: absolute;
+            font-size: 50px;
+            pointer-events: none;
         }
         .cat {
             position: absolute;
             width: 100px;
-            height: 100px;
-            background-image: url('cat.png');
-            background-size: cover;
-            transition: transform 0.1s;
+            transition: transform 0.15s;
         }
         .paw {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background-image: url('paw-print.png');
-            background-size: cover;
+            background: rgba(255, 192, 203, 0.7);
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
             pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="cat" id="cat"></div>
-    <audio id="catSound" src="cat-sound.mp3" preload="auto"></audio>
+    <div id="mouse">🐭</div>
+    <img src="orange_cat.png" class="cat" id="cat1" style="left: 50px; top: 50px;">
+    <img src="orange_spotted_cat.png" class="cat" id="cat2" style="left: 150px; top: 50px;">
+    <img src="grey_spotted_cat.png" class="cat" id="cat3" style="left: 250px; top: 50px;">
+
     <script>
-        const cat = document.getElementById('cat');
-        const catSound = document.getElementById('catSound');
-        let mouseX = 0;
-        let mouseY = 0;
+        const mouse = document.getElementById('mouse');
+        const cats = document.querySelectorAll('.cat');
+        const pawPrints = [];
 
         document.addEventListener('mousemove', (event) => {
-            mouseX = event.clientX;
-            mouseY = event.clientY;
-            cat.style.transform = `translate(${mouseX - 50}px, ${mouseY - 50}px)`;
-        });
+            mouse.style.left = event.pageX + 'px';
+            mouse.style.top = event.pageY + 'px';
 
-        setInterval(() => {
-            const randX = Math.random() * window.innerWidth;
-            const randY = Math.random() * window.innerHeight;
-            cat.style.transform = `translate(${randX}px, ${randY}px)`;
-            catSound.play();
-        }, 2000);
+            cats.forEach(cat => {
+                const catRect = cat.getBoundingClientRect();
+                const targetX = event.pageX - 50; // Center the cat
+                const targetY = event.pageY - 50;
 
-        function createPawPrint(x, y) {
+                const angle = Math.atan2(targetY - catRect.top, targetX - catRect.left);
+                cat.style.transform = `translate(${Math.cos(angle) * 10}px, ${Math.sin(angle) * 10}px)`;
+            });
+
             const paw = document.createElement('div');
-            paw.classList.add('paw');
-            paw.style.left = x + 'px';
-            paw.style.top = y + 'px';
+            paw.className = 'paw';
+            paw.style.left = event.pageX + 'px';
+            paw.style.top = event.pageY + 'px';
             document.body.appendChild(paw);
-            setTimeout(() => paw.remove(), 3000);
-        }
+            pawPrints.push(paw);
 
-        document.addEventListener('click', (event) => {
-            createPawPrint(event.clientX, event.clientY);
+            if (pawPrints.length > 20) {
+                const oldPaw = pawPrints.shift();
+                oldPaw.remove();
+            }
+
+            const meow = new Audio('meow.mp3');
+            meow.play();
         });
     </script>
 </body>
